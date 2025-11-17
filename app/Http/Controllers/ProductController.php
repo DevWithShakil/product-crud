@@ -11,7 +11,9 @@ class ProductController extends Controller
     // Show all products
     public function index()
     {
-        $products = DB::table('products')->paginate(5);
+        $products = DB::table('products')
+        ->orderBy('id', 'desc')
+        ->paginate(5);
         return view('product.index', compact('products'));
     }
 
@@ -33,7 +35,7 @@ class ProductController extends Controller
 
          // Image upload
             $imageName = time() . '.' . $request->image->extension();
-            $request->image->storeAs('public/products', $imageName);
+            $request->image->storeAs('products', $imageName, 'public');
 
         DB::table('products')->insert([
             'product_id' => $request->product_id,
@@ -65,25 +67,37 @@ class ProductController extends Controller
 
     // Update product
     public function update(Request $request, $id)
-    {
-        $request->validate([
-            'product_id' => "required|unique:products,product_id,$id",
-            'name' => 'required',
-            'price' => 'required',
-        ]);
+{
+    $request->validate([
+        'product_id' => "required|unique:products,product_id,$id",
+        'name' => 'required',
+        'price' => 'required',
+        'image' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
+    ]);
 
-        DB::table('products')->where('id', $id)->update([
-            'product_id' => $request->product_id,
-            'name' => $request->name,
-            'description' => $request->description,
-            'price' => $request->price,
-            'stock' => $request->stock,
-            'image' => $request->image,
-            'updated_at' => now(),
-        ]);
+    $product = DB::table('products')->where('id', $id)->first();
 
-        return redirect('/products')->with('success', 'Product updated successfully');
+    $imagePath = $product->image;
+
+    if ($request->hasFile('image')) {
+        $imageName = time() . '.' . $request->image->extension();
+        $request->image->storeAs('public/products', $imageName);
+        $imagePath = 'products/' . $imageName;
     }
+
+    DB::table('products')->where('id', $id)->update([
+        'product_id' => $request->product_id,
+        'name' => $request->name,
+        'description' => $request->description,
+        'price' => $request->price,
+        'stock' => $request->stock,
+        'image' => $imagePath,
+        'updated_at' => now(),
+    ]);
+
+    return redirect('/products')->with('success', 'Product updated successfully');
+}
+
 
     // Delete product
     public function destroy($id)

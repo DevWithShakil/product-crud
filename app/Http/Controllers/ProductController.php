@@ -28,8 +28,12 @@ class ProductController extends Controller
             'product_id' => 'required|unique:products',
             'name' => 'required',
             'price' => 'required',
-            'image' => 'required',
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+         // Image upload
+            $imageName = time() . '.' . $request->image->extension();
+            $request->image->storeAs('public/products', $imageName);
 
         DB::table('products')->insert([
             'product_id' => $request->product_id,
@@ -37,7 +41,7 @@ class ProductController extends Controller
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
-            'image' => $request->image,
+            'image' => 'products/'.$imageName,
             'created_at' => now(),
             'updated_at' => now(),
         ]);

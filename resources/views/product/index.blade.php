@@ -31,9 +31,15 @@
                     <td>{{ $p->name }}</td>
                     <td>{{ $p->price }}</td>
                     <td>{{ $p->stock }}</td>
+
                     <td>
-                        <img src="{{ asset('storage/'.$p->image) }}" width="60">
+                        @if($p->image)
+                            <img src="{{ asset('storage/'.$p->image) }}" width="60">
+                        @else
+                            No Image
+                        @endif
                     </td>
+
                     <td>
                         <a href="{{ url('/products/'.$p->id) }}" class="btn btn-info btn-sm">View</a>
                         <a href="{{ url('/products/'.$p->id.'/edit') }}" class="btn btn-warning btn-sm">Edit</a>
@@ -41,10 +47,10 @@
                         <form action="{{ url('/products/'.$p->id) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
-                            <button onclick="return confirm('Delete?')" class="btn btn-danger btn-sm">Delete</button>
+                            <button onclick="return confirm('Delete this product?')" class="btn btn-danger btn-sm">Delete</button>
                         </form>
-
                     </td>
+
                 </tr>
             @endforeach
         </tbody>
